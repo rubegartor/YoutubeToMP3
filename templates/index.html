@@ -30,8 +30,8 @@
             </div>
             <div class="card-body">
               <form action="/songs" method="POST">
-                <textarea name="inputURL" class="form-control" rows="5"></textarea>
-                <button type="submit" name="Submit" class="btn btn-success mt-3">Descargar</button>
+                <textarea name="inputURL" class="form-control" rows="5" id="inputURL"></textarea>
+                <button type="submit" name="Submit" class="btn btn-success mt-3" id="countSongs">Descargar (0)</button>
               </form>
             </div>
           </div>
@@ -51,5 +51,18 @@
         </div>
       </div>
     </div>
+    <script>
+    var inputURL = document.getElementById('inputURL');
+    var countSongs = document.getElementById('countSongs');
+    inputURL.addEventListener('input', function() {
+      var text = $('#inputURL').val();
+      if(text.trim() != '') {
+        var lines = text.split(/\r|\r\n|\n/);
+        countSongs.innerHTML = 'Descargar (' + lines.length + ')';
+      }else{
+        countSongs.innerHTML = 'Descargar (0)';
+      }
+    });
+    </script>
   </body>
 </html>
