@@ -51,18 +51,6 @@
         </div>
       </div>
     </div>
-    <script>
-    var inputURL = document.getElementById('inputURL');
-    var countSongs = document.getElementById('countSongs');
-    inputURL.addEventListener('input', function() {
-      var text = $('#inputURL').val();
-      if(text.trim() != '') {
-        var lines = text.split(/\r|\r\n|\n/);
-        countSongs.innerHTML = 'Descargar (' + lines.length + ')';
-      }else{
-        countSongs.innerHTML = 'Descargar (0)';
-      }
-    });
-    </script>
+    <script src="{{ url_for('static', filename='js/countSongs.js') }}"></script>
   </body>
 </html>
