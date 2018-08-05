@@ -1,2 +1,4 @@
 Flask==1.0.2
 youtube-dl==2018.4.16
+beautifulsoup4==4.4.1
+requests==2.9.1
