@@ -1,0 +1,40 @@
+{% include "nav.html" %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-sm-8 mb-4">
+      <div class="card mb-3">
+        <div class="card-header text-white" style="background: #2980b9;">
+          <i class="fas fa-headphones"></i> Descargar Playlist MP3
+        </div>
+        <div class="card-body">
+          <form action="/playlist" method="POST">
+            <input name="playlistURL" class="form-control" />
+            <button type="submit" name="Submit" class="btn btn-success mt-3">Descargar playlist</button>
+          </form>
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              {% for message in messages %}
+                {{ message }}
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4 mb-4">
+      <div class="card">
+        <div class="card-header text-white" style="background: #2980b9;">
+          <i class="fas fa-info-circle"></i> Información
+        </div>
+        <div class="card-body">
+          <strong>Formato de URL:</strong>
+          <p>
+            https://www.youtube.com/playlist?list=...
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
