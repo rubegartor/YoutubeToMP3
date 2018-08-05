@@ -15,7 +15,7 @@ def internal_error(e):
   return render_template('e500.html')
 
 def notfound_error(e):
-  return render_template('e400.html')
+  return render_template('e404.html')
 
 def methodnotallowed_error(e):
   return render_template('e405.html')
