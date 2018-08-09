@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, jsonify
 from bs4 import BeautifulSoup as bs
 import requests
 import youtube_dl
@@ -57,6 +57,11 @@ def zipFile(src, dst):
       zf.write(absname, arcname)
   zf.close()
 
+def getVideoTitle(URL):
+  with youtube_dl.YoutubeDL({'skip_download': True,}) as ydl:
+    info = ydl.extract_info(URL, download=False)
+    return info.get('title', None)
+
 @app.route('/')
 def main():
   return render_template('index.html')
@@ -65,42 +70,24 @@ def main():
 def index():
   return render_template('index.html')
 
-@app.route('/playlist', methods = ['GET', 'POST'])
-def playlist():
-  if request.method == 'POST':
-    r = requests.get(request.form['playlistURL'])
-    soup = bs(r.text, 'html.parser')
-    res = soup.find_all('a',{'class':'pl-video-title-link'})
-    vid_id = [l.get('href').split('=')[1].split('&')[0] for l in res]
+@app.route('/addSong')
+def addSong():
+  res = request.args.get('songURL', '', type=str)
+  videoTitle = getVideoTitle(res)
+  return jsonify(result=res, title=videoTitle)
 
-    path = generatePath(32)
-
-    for id in vid_id:
-      req = requests.get('https://www.youtube.com/watch?v=' + id)
+@app.route('/getSongs')
+def getSongs():
+  res = request.args.get('songs', '', type=str)
+  songs = list(set(res.split(',')))
+  path = generatePath(32)
+  if len(songs) != 0:
+    for id in songs:
+      url = 'https://www.youtube.com/watch?v={}'.format(id)
+      req = requests.get(url)
       if req.status_code == requests.codes['ok']:
         try:
-          download_mp3('https://www.youtube.com/watch?v=' + id, path)
-        except:
-          #No se ha podido descargar el siguiente enlace
-          continue
-
-    zipFile('static/downloads/{}'.format(path), 'static/downloads/{}'.format(path))
-    return send_file('static/downloads/{}.zip'.format(path), attachment_filename="playlist.zip")
-
-  return render_template('playlist.html')
-
-@app.route('/songs', methods = ['POST'])
-def download():
-  _url = list(set([line.strip() for line in request.form['inputURL'].split('\r\n') if line.strip() != '' and line.startswith('https://www.youtube.com/watch?v=')]))
-
-  if _url != []:
-    path = generatePath(32)
-
-    for song in _url:
-      req = requests.get(song)
-      if req.status_code == requests.codes['ok']:
-        try:
-          download_mp3(song, path)
+          download_mp3(url, path)
         except:
           #No se ha podido descargar el siguiente enlace
           continue
@@ -108,9 +95,36 @@ def download():
         pass
 
     zipFile('static/downloads/{}'.format(path), 'static/downloads/{}'.format(path))
-    return send_file('static/downloads/{}.zip'.format(path), attachment_filename="songs.zip")
+    return jsonify(result=path)
   else:
     return render_template('notvalid.html')
+
+@app.route('/playlist')
+def playlist():
+  return render_template('playlist.html')
+
+@app.route('/getPlaylist')
+def getPlaylist():
+  res = request.args.get('playlist', '', type=str)
+  r = requests.get(res)
+  soup = bs(r.text, 'html.parser')
+  res = soup.find_all('a',{'class':'pl-video-title-link'})
+  vid_id = [l.get('href').split('=')[1].split('&')[0] for l in res]
+
+  path = generatePath(32)
+
+  for id in vid_id:
+    req = requests.get('https://www.youtube.com/watch?v=' + id)
+    if req.status_code == requests.codes['ok']:
+      try:
+        url = 'https://www.youtube.com/watch?v=' + id
+        download_mp3(url, path)
+      except:
+        #No se ha podido descargar el siguiente enlace
+        continue
+
+  zipFile('static/downloads/{}'.format(path), 'static/downloads/{}'.format(path))
+  return jsonify(result=path)
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=5000, debug=False)
