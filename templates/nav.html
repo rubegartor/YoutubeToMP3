@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <title>Youtube to MP3</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" href="../static/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script type=text/javascript>
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
   </head>
   <body style="background: #d8dfe1;">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -18,6 +21,7 @@
         <div class="navbar-nav">
           <a class="nav-item nav-link active" href="/index">Inicio</a>
           <a class="nav-item nav-link" href="/playlist">Playlist</a>
+          <a class="nav-item nav-link" href="#">Información</a>
         </div>
       </div>
     </nav>
