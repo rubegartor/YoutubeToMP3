@@ -58,7 +58,7 @@ def zipFile(src, dst):
   zf.close()
 
 def getVideoTitle(URL):
-  with youtube_dl.YoutubeDL({'skip_download': True,}) as ydl:
+  with youtube_dl.YoutubeDL({'skip_download': True}) as ydl:
     info = ydl.extract_info(URL, download=False)
     return info.get('title', None)
 
