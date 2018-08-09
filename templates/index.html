@@ -1,46 +1,46 @@
     {% include "nav.html" %}
-    <div class="container mt-4">
+    <div class="jumbotron text-white" style="background: #34495e; border-radius: 0px;">
       <div class="row">
-        <div class="col-sm-8 mb-4">
-          <div class="card mb-3">
-            <div class="card-header text-white" style="background: #2980b9;">
-              <i class="fas fa-headphones"></i> Descargar MP3
-            </div>
-            <div class="card-body">
-              <form action="/songs" method="POST">
-                <textarea name="inputURL" class="form-control" rows="5" id="inputURL"></textarea>
-                <button type="submit" name="Submit" class="btn btn-success mt-3" id="countSongs">Descargar (0)</button>
-              </form>
-            </div>
-          </div>
-          <div class="card mb-4">
-            <div class="card-header text-white" style="background: #2980b9;">
-              <i class="fas fa-headphones"></i> Preview Videos
-            </div>
-            <div class="card-body text-center">
-              <button data-toggle="collapse" data-target="#preview" class="btn btn-info btn-block mb-2">Ver preview</button>
-              <div id="preview" class="collapse">
-                <div id="previewList">Añade canciones a a lista</div>
-              </div>
-            </div>
-          </div>
+        <div class="col-sm-6">
+          <h1>YoutubeToMP3</h1>
+          <p>Añade canciones a la lista para comenzar</p>
         </div>
-        <div class="col-sm-4 mb-4">
-          <div class="card">
-            <div class="card-header text-white" style="background: #2980b9;">
-              <i class="fas fa-info-circle"></i> Información
+        <div class="col-sm-6">
+          <button type="button" class="btn btn-info btn-block" id="openModal"><i class="fas fa-plus"></i> Añadir canción</button>
+          <button type="button" class="btn btn-primary btn-block" id="dwlSongsBtn"><i class="fas fa-download" id="dwlLoader"></i> Descargar</button>
+        </div>
+      </div>
+    </div>
+    <div class="container mt-4">
+      <div class="modal fade" id="modal" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Añadir canción</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
-            <div class="card-body">
-              <strong>Formato de URL:</strong>
-              <p>
-                https://www.youtube.com/watch?v=...
-              </p>
+            <div class="modal-body">
+              <div id="modalError"></div>
+              <input class="form-control" placeholder="https://www.youtube.com/watch?v=..." id="modalInput" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-success ml-3" id="addSong"><i class="fas fa-spinner fa-pulse fa-fw" id="modalLoader"></i> Añadir</button>
             </div>
           </div>
         </div>
       </div>
+      <div class="row">
+        <div class="col-sm-12 mb-4">
+          <div id="dwlStatus">
+            <div class="alert alert-primary text-center">
+              <i class="fas fa-info-circle"></i> Aún no se han añadido canciones a la lista
+            </div>
+          </div>
+          <div id="songList"></div>
+        </div>
+      </div>
     </div>
-    <script src="{{ url_for('static', filename='js/countSongs.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/getThumbnail.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/addSong.js') }}"></script>
   </body>
 </html>
