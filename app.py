@@ -60,7 +60,19 @@ def zipFile(src, dst):
 def getVideoTitle(URL):
   with youtube_dl.YoutubeDL({'skip_download': True}) as ydl:
     info = ydl.extract_info(URL, download=False)
-    return info.get('title', None)
+    title = info.get('title', None)
+    seconds
+
+def getURLCode(URL):
+  if os.name == 'nt':
+    req = requests.get(URL, verify=False)
+  else:
+    req = requests.get(URL, verify=True)
+
+  if req.status_code == requests.codes['ok']:
+    return True
+  else:
+    return False
 
 @app.route('/')
 def main():
@@ -84,8 +96,7 @@ def getSongs():
   if len(songs) != 0:
     for id in songs:
       url = 'https://www.youtube.com/watch?v={}'.format(id)
-      req = requests.get(url)
-      if req.status_code == requests.codes['ok']:
+      if getURLCode(url):
         try:
           download_mp3(url, path)
         except:
@@ -114,10 +125,9 @@ def getPlaylist():
   path = generatePath(32)
 
   for id in vid_id:
-    req = requests.get('https://www.youtube.com/watch?v=' + id)
-    if req.status_code == requests.codes['ok']:
+    url = 'https://www.youtube.com/watch?v=' + id
+    if getURLCode(url):
       try:
-        url = 'https://www.youtube.com/watch?v=' + id
         download_mp3(url, path)
       except:
         #No se ha podido descargar el siguiente enlace
