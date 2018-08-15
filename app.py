@@ -60,8 +60,7 @@ def zipFile(src, dst):
 def getVideoTitle(URL):
   with youtube_dl.YoutubeDL({'skip_download': True}) as ydl:
     info = ydl.extract_info(URL, download=False)
-    title = info.get('title', None)
-    seconds
+    return info.get('title', None)
 
 def getURLCode(URL):
   if os.name == 'nt':
@@ -81,6 +80,10 @@ def main():
 @app.route('/index')
 def index():
   return render_template('index.html')
+
+@app.route('/info')
+def info():
+  return render_template('info.html')
 
 @app.route('/addSong')
 def addSong():
