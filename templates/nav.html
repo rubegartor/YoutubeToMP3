@@ -22,9 +22,9 @@
       </button>
       <div class="collapse navbar-collapse" id="collapsibleNavbar">
         <div class="navbar-nav">
-          <a class="nav-item nav-link active" href="/index">Inicio</a>
-          <a class="nav-item nav-link" href="/playlist">Playlist</a>
-          <a class="nav-item nav-link" href="/info">Información</a>
+          <a class="nav-item nav-link active" href="{{ url_for('index') }}">Inicio</a>
+          <a class="nav-item nav-link" href="{{ url_for('playlist') }}">Playlist</a>
+          <a class="nav-item nav-link" href="{{ url_for('info') }}">Información</a>
         </div>
       </div>
     </nav>
