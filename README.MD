@@ -5,7 +5,12 @@ YoutubeToMP3 es un downloader y conversor de videos de Youtube a MP3 con la posi
 ![index.html](https://i.imgur.com/k9jyQPB.png)
 
 ## Instalación:
-- Instalar ffmpeg
+- Instalar ffmpeg en Linux:
   - `sudo apt-get install ffmpeg`
+- Instalar ffmpeg en Windows:
+  - Descargar ffmpeg para Windows: 
+  `https://www.ffmpeg.org/download.html#build-windows`
+  - Ejecutar el siguiente comando:
+  `setx /M PATH "path\to\ffmpeg\bin;%PATH%"`
 - Instalar librerias para python:
   - `python3 -m pip install -r requirements.txt`
