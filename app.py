@@ -87,9 +87,12 @@ def info():
 
 @app.route('/addSong')
 def addSong():
-  res = request.args.get('songURL', '', type=str)
-  videoTitle = getVideoTitle(res)
-  return jsonify(result=res, title=videoTitle)
+  try:
+    res = request.args.get('songURL', '', type=str)
+    videoTitle = getVideoTitle(res)
+    return jsonify(result=res, title=videoTitle)
+  except Exception:
+    return jsonify(result='err')
 
 @app.route('/getSongs')
 def getSongs():

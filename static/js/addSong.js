@@ -34,10 +34,18 @@ $(function() {
           $.getJSON($SCRIPT_ROOT + '/addSong', {
             songURL: $('#modalInput').val()
           }, function(data) {
-            $('#modalLoader').hide();
-            $('#dwlStatus').html('');
-            $('#songList').append('<div class="card mt-3 mb-3" id="' + data.result.split('=')[1] + '"><div class="card-body"><div class="row"><div class="col-sm-2"><img src="https://img.youtube.com/vi/' + data.result.split('=')[1] + '/0.jpg" class="img-fluid mx-auto d-block" /></div> <div class="col-sm-10 my-auto">' + data.title + ' (<a href="#" onclick="removeSong(\'' + data.result.split('=')[1] + '\');">Eliminar</a>)</div></div></div></div></div>');
-            song_list.push(data.result.split('=')[1]);
+            if(data.result == 'err'){
+              $('#modalError').html('<div class="alert alert-danger" id="fadeAlert"><i class="fas fa-info-circle"></i> No se ha podido descargar la imagen</div>');
+              $('#inputURL').val('');
+              $('#fadeAlert').fadeTo(3000, 500).slideUp(500, function(){
+                $('#fadeAlert').slideUp(500);
+              });
+            }else{
+              $('#modalLoader').hide();
+              $('#dwlStatus').html('');
+              $('#songList').append('<div class="card mt-3 mb-3" id="' + data.result.split('=')[1] + '"><div class="card-body"><div class="row"><div class="col-sm-2"><img src="https://img.youtube.com/vi/' + data.result.split('=')[1] + '/0.jpg" class="img-fluid mx-auto d-block" /></div> <div class="col-sm-10 my-auto">' + data.title + ' (<a href="#" onclick="removeSong(\'' + data.result.split('=')[1] + '\');">Eliminar</a>)</div></div></div></div></div>');
+              song_list.push(data.result.split('=')[1]);
+            }
             $('#modalInput').val('');
           });
           return false;
