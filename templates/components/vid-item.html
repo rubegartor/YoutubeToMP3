@@ -1,0 +1,25 @@
+<div class="item" data-id="{{ vidId }}" data-component="vid">
+    <div class="ui small image" style="display: flex;">
+        <img src="{{ imageSrc }}" class="rounded">
+    </div>
+    <div class="middle aligned content">
+        <div class="header">
+            {{ vidTitle }}
+        </div>
+        <div class="description">
+            <p>
+                <a class="ui image label" data-action="openUrl" data-url="{{ channelUrl }}">
+                    <i class="youtube icon red"></i> {{ vidDescription }}
+                </a>
+            </p>
+        </div>
+        <div class="extra">
+            <button class="ui labeled icon right floated button red" data-action="delete" data-id="{{ vidId }}">
+                <i class="trash icon"></i> Eliminar
+            </button>
+            <button class="ui labeled icon right floated button green" data-action="downloadOne" data-id="{{ vidId }}">
+                <i class="arrow alternate circle down icon"></i> Descargar
+            </button>
+        </div>
+    </div>
+</div>

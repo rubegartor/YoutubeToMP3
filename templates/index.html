@@ -1,46 +1,54 @@
-    {% include "nav.html" %}
-    <div class="jumbotron text-white" style="background: #34495e; border-radius: 0px;">
-      <div class="row">
-        <div class="col-sm-6">
-          <h1>YoutubeToMP3</h1>
-          <p>Añade canciones a la lista para comenzar</p>
+{% extends "base.html" %}
+
+{% block title %}YoutubeToMP3{% endblock %}
+
+{% block container %}
+    <div class="ui basic modal">
+        <div class="ui icon header">
+            <i class="download icon"></i>
+            Descargar MP3
         </div>
-        <div class="col-sm-6">
-          <button type="button" class="btn btn-info btn-block" id="openModal"><i class="fas fa-plus"></i> Añadir canción</button>
-          <button type="button" class="btn btn-primary btn-block" id="dwlSongsBtn"><i class="fas fa-download" id="dwlLoader"></i> Descargar</button>
+        <div class="content" style="text-align: center;">
+            <p>¿Quieres descargar todos los MP3 procesados en un archivo comprimido(.zip)?</p>
         </div>
-      </div>
+        <div class="actions">
+            <div class="ui red basic cancel inverted button">
+                <i class="remove icon"></i>
+                No
+            </div>
+            <div class="ui green ok inverted button" data-action="downloadZip">
+                <i class="checkmark icon"></i>
+                Sí
+            </div>
+        </div>
     </div>
-    <div class="container mt-4">
-      <div class="modal fade" id="modal" role="dialog">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h4 class="modal-title">Añadir canción</h4>
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <div class="ui blurring" style="height: 100%;">
+        <br><br>
+        <div class="ui inverted dimmer"></div>
+        <div class="ui one column doubling stackable grid container">
+            <div class="column center aligned">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" width="50%"/>
             </div>
-            <div class="modal-body">
-              <div id="modalError"></div>
-              <input class="form-control" placeholder="https://www.youtube.com/watch?v=..." id="modalInput" />
+            <div class="column">
+                <div class="ui fluid icon input big">
+                    <input type="text" placeholder="Youtube URL..." id="ytUrlInput">
+                    <i class="inverted circular search link icon orange" data-action="add"></i>
+                </div>
+                <div class="ui hidden divider"></div>
+                <div class="ui progress" data-component="totalProgress" style="display: none;">
+                    <div class="bar">
+                        <div class="progress"></div>
+                    </div>
+                    <div class="label" data-component="label-totalProgress"></div>
+                </div>
+                <button class="ui button labeled icon blue fluid" data-action="downloadAll" style="display: none;">
+                    <i class="arrow alternate circle down icon"></i> Descargar todo
+                </button>
+                <div class="ui divider"></div>
+                <div class="ui divided items" id="vidListContainer">
+
+                </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-success ml-3" id="addSong"><i class="fas fa-spinner fa-pulse fa-fw" id="modalLoader"></i> Añadir</button>
-            </div>
-          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-12 mb-4">
-          <div id="dwlStatus">
-            <div class="alert alert-primary text-center">
-              <i class="fas fa-info-circle"></i> Aún no se han añadido canciones a la lista
-            </div>
-          </div>
-          <div id="songList"></div>
-        </div>
-      </div>
     </div>
-    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/addSong.js') }}"></script>
-  </body>
-</html>
+{% endblock %}

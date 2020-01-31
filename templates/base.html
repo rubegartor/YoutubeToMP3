@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='semantic-ui/semantic.min.css') }}">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="{{ url_for('static', filename='semantic-ui/semantic.min.js') }}"></script>
+    <script>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+</head>
+<body>
+    {% block container %}
+
+    {% endblock %}
+    {% block javascripts %}
+        <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+        <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/socketioListener.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% endblock %}
+</body>
+</html>
+

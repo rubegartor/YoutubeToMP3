@@ -1,146 +1,125 @@
-from flask import Flask, render_template, request, jsonify
-from bs4 import BeautifulSoup as bs
-import requests
+from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask_socketio import SocketIO
 import youtube_dl
 import string
 import random
 import zipfile
-import time
 import os
 
 app = Flask(__name__)
+socketIO = SocketIO(app)
 app.secret_key = 'key'
+totalSongCount = 0
+processingSongIndex = 1
 
-def internal_error(e):
-  return render_template('e500.html')
-
-def notfound_error(e):
-  return render_template('e404.html')
-
-def methodnotallowed_error(e):
-  return render_template('e405.html')
-
-app.register_error_handler(500, internal_error)
-app.register_error_handler(405, methodnotallowed_error)
-app.register_error_handler(404, notfound_error)
 
 def generatePath(length):
-  return ''.join(random.choice(string.ascii_letters) for x in range(length))
+    return ''.join(random.choice(string.ascii_letters) for x in range(length))
+
+
+def ytdl_hook(d):
+    percent = (100 / totalSongCount)
+    if d['status'] == 'finished':
+        global processingSongIndex
+        socketIO.emit('updateTotalDownloadProgress', {'percent': percent * processingSongIndex})
+        processingSongIndex += 1
+
 
 def download_mp3(song, path):
-  ydl_opts = {
-    'format': 'bestaudio/best',
-    'outtmpl': 'static/downloads/{}/%(title)s.%(ext)s'.format(path),
-    'quiet': True,
-    'cachedir': '/tmp',
-    'postprocessors': [{
-      'key': 'FFmpegExtractAudio',
-      'preferredcodec': 'mp3'
-    }]
-  }
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': '/var/files/downloads/{}/%(title)s.%(ext)s'.format(path),
+        'quiet': True,
+        'cachedir': '/tmp',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3'
+        }],
+        'progress_hooks': [ytdl_hook],
+    }
 
-  start_time = time.time()
-  print('Downloading from: {}'.format(song.rstrip()))
-  with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-    ydl.download([song])
-  stop_time = time.time()
-  print('Downloaded in {} seconds.\n'.format(round(stop_time - start_time, 2)))
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([song])
+
 
 def zipFile(src, dst):
-  zf = zipfile.ZipFile('{}.zip'.format(dst), 'w', zipfile.ZIP_DEFLATED)
-  abs_src = os.path.abspath(src)
-  for dirname, subdirs, files in os.walk(src):
-    for filename in files:
-      absname = os.path.abspath(os.path.join(dirname, filename))
-      arcname = absname[len(abs_src) + 1:]
-      print('[INFO] Zipping {} as {}\n'.format(os.path.join(dirname, filename), arcname))
-      zf.write(absname, arcname)
-  zf.close()
+    zf = zipfile.ZipFile('{}.zip'.format(dst), 'w', zipfile.ZIP_DEFLATED)
+    abs_src = os.path.abspath(src)
+    for dirname, subdirs, files in os.walk(src):
+        for filename in files:
+            absname = os.path.abspath(os.path.join(dirname, filename))
+            arcname = absname[len(abs_src) + 1:]
+            print('[INFO] Zipping {} as {}\n'.format(os.path.join(dirname, filename), arcname))
+            zf.write(absname, arcname)
+    zf.close()
 
-def getVideoTitle(URL):
-  with youtube_dl.YoutubeDL({'skip_download': True}) as ydl:
-    info = ydl.extract_info(URL, download=False)
-    return info.get('title', None)
-
-def getURLCode(URL):
-  if os.name == 'nt':
-    req = requests.get(URL, verify=False)
-  else:
-    req = requests.get(URL, verify=True)
-
-  if req.status_code == requests.codes['ok']:
-    return True
-  else:
-    return False
 
 @app.route('/')
-def main():
-  return render_template('index.html')
-
 @app.route('/index')
-def index():
-  return render_template('index.html')
+def main():
+    return render_template('index.html')
 
-@app.route('/info')
-def info():
-  return render_template('info.html')
 
-@app.route('/addSong')
+@app.route('/addSong', methods=['POST'])
 def addSong():
-  try:
-    res = request.args.get('songURL', '', type=str)
-    videoTitle = getVideoTitle(res)
-    return jsonify(result=res, title=videoTitle)
-  except Exception:
-    return jsonify(result='err')
+    try:
+        vidInfo = request.json
+        vidItem = render_template('components/vid-item.html',
+                                  vidId=vidInfo['vidId'],
+                                  vidTitle=vidInfo['vidTitle'],
+                                  vidDescription=vidInfo['vidDescription'],
+                                  channelUrl=vidInfo['channelUrl'],
+                                  imageSrc=vidInfo['imageSrc'])
 
-@app.route('/getSongs')
+        return jsonify(vidItem)
+    except Exception:
+        return jsonify(result='err')
+
+
+@app.route('/getVideoInfo', methods=['POST'])
+def getVideoInfo():
+    ytUrl = request.json
+
+    def getVideoMetadata(url):
+        with youtube_dl.YoutubeDL({'skip_download': True}) as ydl:
+            return ydl.extract_info(url, download=False)
+
+    vidInfo = getVideoMetadata(ytUrl['url'])
+    vidInfoObject = {
+        'vidId': vidInfo.get('id', None),
+        'vidTitle': vidInfo.get('title', None),
+        'vidDescription': vidInfo.get('uploader', None),
+        'channelUrl': vidInfo.get('channel_url', None),
+        'imageSrc': vidInfo.get('thumbnail', None)
+    }
+
+    return jsonify(vidInfoObject)
+
+
+@app.route('/processSongs', methods=['POST'])
 def getSongs():
-  res = request.args.get('songs', '', type=str)
-  songs = list(set(res.split(',')))
-  path = generatePath(32)
-  if len(songs) != 0:
-    for id in songs:
-      url = 'https://www.youtube.com/watch?v={}'.format(id)
-      if getURLCode(url):
-        try:
-          download_mp3(url, path)
-        except:
-          #No se ha podido descargar el siguiente enlace
-          continue
-      else:
-        pass
+    global totalSongCount
+    global processingSongIndex
+    songs = request.json
+    totalSongCount = len(songs)
+    path = generatePath(32)
 
-    zipFile('static/downloads/{}'.format(path), 'static/downloads/{}'.format(path))
-    return jsonify(result=path)
-  else:
-    return render_template('notvalid.html')
+    for song in songs:
+        download_mp3(song, path)
 
-@app.route('/playlist')
-def playlist():
-  return render_template('playlist.html')
+    zipFile('/var/files/downloads/{}'.format(path), '/var/files/files/{}'.format(path))
 
-@app.route('/getPlaylist')
-def getPlaylist():
-  res = request.args.get('playlist', '', type=str)
-  r = requests.get(res)
-  soup = bs(r.text, 'html.parser')
-  res = soup.find_all('a',{'class':'pl-video-title-link'})
-  vid_id = [l.get('href').split('=')[1].split('&')[0] for l in res]
+    totalSongCount = 0
+    processingSongIndex = 1
+    socketIO.emit('downloadReady', {'downloadPath': path})
+    return jsonify('')
 
-  path = generatePath(32)
 
-  for id in vid_id:
-    url = 'https://www.youtube.com/watch?v=' + id
-    if getURLCode(url):
-      try:
-        download_mp3(url, path)
-      except:
-        #No se ha podido descargar el siguiente enlace
-        continue
+@app.route('/downloadZip/<path>', methods=['GET', 'POST'])
+def downloadZip(path):
+    return send_from_directory(directory='/var/files/files/', filename='{}.zip'.format(path))
 
-  zipFile('static/downloads/{}'.format(path), 'static/downloads/{}'.format(path))
-  return jsonify(result=path)
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000, debug=False)
+    socketIO.run(app)
+    app.run(host='0.0.0.0', port=5000, debug=False)
